@@ -1,4 +1,5 @@
 #include "header/connection.hpp"
+#include "header/delay_base.hpp"
 #include "resultset_metadata.h"
 #include <mysql/jdbc.h>
 #include <iostream>
@@ -10,12 +11,19 @@
 #include <gtkmm/builder.h>
 #include "header/window.hpp"
 
+#include "header/delay.hpp"
+
+void a(int a){std::cout<<a<<std::endl;}
+int b(){return 1;}
+
 int main(void)
 {
     connection::ConnectionSettings settings;
 
     try
     {
+        worker::Delay<void (*) (int) , int(*)(void)> delay(5, a, b);
+
         connection::MysqlConnection& connection = connection::MysqlConnection::instance(settings);
 
         Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("View");
