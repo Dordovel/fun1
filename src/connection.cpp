@@ -74,6 +74,23 @@ namespace connection
         return result;
     }
 
+    std::vector<std::string> MysqlConnection::fetch_array()
+    { 
+        std::vector<std::string> result;
+
+        sql::ResultSetMetaData* meta = this->_resultSet->getMetaData();
+
+        const std::size_t fieldsCount = meta->getColumnCount();
+        result.reserve(fieldsCount);
+        
+        for(std::size_t field = 1; field < fieldsCount; ++field)
+        {
+            result.emplace_back(this->_resultSet->getString(field));
+        }
+
+        return result;
+    }
+
     std::vector<std::string> MysqlConnection::fetch_columns()
     {
         std::vector<std::string> result;
@@ -90,19 +107,9 @@ namespace connection
         return result;
     }
 
-    std::vector<std::unordered_map<std::string, std::string>> MysqlConnection::process_list()
+    void MysqlConnection::process_list()
     {
-        std::vector<std::unordered_map<std::string, std::string>> process;
         this->execute("SHOW PROCESSLIST");
-        process.reserve(this->fetch_size());
-
-        while (this->next())
-        {
-            auto row = this->fetch_assoc();
-            process.push_back(row);
-        }
-
-        return process;
     }
 
     MysqlConnection::~MysqlConnection()

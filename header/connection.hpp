@@ -35,9 +35,10 @@ namespace connection
             bool next();
             void execute(const std::string& query);
             std::unordered_map<std::string, std::string> fetch_assoc();
+            std::vector<std::string> fetch_array();
             std::vector<std::string> fetch_columns();
 
-            std::vector<std::unordered_map<std::string, std::string>> process_list();
+            void process_list();
             
             ~MysqlConnection();
     };

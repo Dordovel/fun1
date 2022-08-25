@@ -10,19 +10,35 @@
 #include <gtkmm/builder.h>
 #include "header/window.hpp"
 
-
 int main(void)
 {
     connection::ConnectionSettings settings;
 
-    connection::MysqlConnection& connection = connection::MysqlConnection::instance(settings);
     try
     {
+        connection::MysqlConnection& connection = connection::MysqlConnection::instance(settings);
+
         Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("View");
         Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
         builder->add_from_file("./Main.glade");
         view::View* view = nullptr;
+
         builder->get_widget_derived("MainWindow", view);
+
+        if(!view) return EXIT_FAILURE;
+
+        connection.process_list();
+        auto columns = connection.fetch_columns();
+        for(const std::string& column : columns)
+        {
+            view->add_columns(column);
+        }
+
+        while(connection.next())
+        {
+            view->add_row(connection.fetch_array());
+        }
+
         app->run(*view);
     }
     catch (sql::SQLException &e)

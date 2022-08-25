@@ -19,6 +19,7 @@ namespace view
         public:
             View(Gtk::Window::BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& m_RefGlade);
             void add_columns(std::string columns);
+            void add_row(std::vector<std::string> row);
     };
 };
 
