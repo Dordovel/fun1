@@ -54,6 +54,7 @@ namespace connection
 
     void MysqlConnection::execute(const std::string& query)
     {
+        this->clear_last_execute_decriptors();
         this->_resultSet = this->_statement->executeQuery(query);
     }
 
@@ -107,6 +108,20 @@ namespace connection
         return result;
     }
 
+    void MysqlConnection::clear_last_execute_decriptors()
+    {
+        if(this->_resultSet)
+        {
+            if(!this->_resultSet->isClosed())
+            {
+                this->_resultSet->close();
+            }
+
+            delete this->_resultSet;
+            this->_resultSet = nullptr;
+        }
+    }
+
     void MysqlConnection::process_list()
     {
         this->execute("SHOW PROCESSLIST");
@@ -116,10 +131,12 @@ namespace connection
     {
         if(this->_connection)
         {
+            this->_connection->close();
             delete this->_connection;
         }
         if(this->_statement)
         {
+            this->_statement->close();
             delete this->_statement;
         }
     }

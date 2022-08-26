@@ -37,6 +37,7 @@ namespace connection
             std::unordered_map<std::string, std::string> fetch_assoc();
             std::vector<std::string> fetch_array();
             std::vector<std::string> fetch_columns();
+            void clear_last_execute_decriptors();
 
             void process_list();
             

@@ -29,7 +29,7 @@ namespace worker
             if(!delay->_isPause)
             {
                 delay->invoke();
-                std::this_thread::sleep_for(std::chrono::milliseconds (this->_delay));
+                std::this_thread::sleep_for(std::chrono::seconds(delay->_delay));
             }
             else if(delay->_isPause)
             {
@@ -41,6 +41,11 @@ namespace worker
     void ADelay::stop() noexcept
     {
         this->_isPause = true;
+    }
+
+    void ADelay::change_time(long delay)
+    {
+        this->_delay = delay;
     }
 
     ADelay::~ADelay()

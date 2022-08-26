@@ -33,6 +33,8 @@ namespace worker
             void run() noexcept;
 
             void stop() noexcept;
+
+            void change_time(long delay);
     };
 };
 #endif //DELAY_ABSTRACT

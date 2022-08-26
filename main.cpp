@@ -12,9 +12,7 @@
 #include "header/window.hpp"
 
 #include "header/delay.hpp"
-
-void a(int a){std::cout<<a<<std::endl;}
-int b(){return 1;}
+#include "header/worker.hpp"
 
 int main(void)
 {
@@ -22,8 +20,6 @@ int main(void)
 
     try
     {
-        worker::Delay<void (*) (int) , int(*)(void)> delay(5, a, b);
-
         connection::MysqlConnection& connection = connection::MysqlConnection::instance(settings);
 
         Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("View");
@@ -46,6 +42,32 @@ int main(void)
         {
             view->add_row(connection.fetch_array());
         }
+
+        auto functor = [&connection]()
+            {
+                std::vector<std::vector<std::string>> buffer;
+                connection.process_list();
+                buffer.reserve(connection.fetch_size());
+
+                while(connection.next())
+                {
+                    buffer.emplace_back(connection.fetch_array());
+                }
+                connection.clear_last_execute_decriptors();
+                return buffer;
+            };
+
+        auto callback = [&view](std::vector<std::vector<std::string>> rows)
+            {
+                view->add_rows(std::move(rows));
+            };
+
+        worker::Worker<decltype(callback) , decltype(functor)> worker(5, callback, functor);
+        view->add_timer_value(5);
+        view->add_timer_value(10);
+        view->add_timer_value(20);
+        view->add_timer_value(50);
+        view->change_timer_subscribe(&worker);
 
         app->run(*view);
     }

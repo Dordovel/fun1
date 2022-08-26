@@ -7,7 +7,7 @@
 namespace worker
 {
     template <typename Callback, typename Functor>
-    class Delay final : public ADelay
+    class Delay : public ADelay
     {
         private:
             Callback _callback;
