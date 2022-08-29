@@ -1,15 +1,14 @@
 #include "../header/connection.hpp"
-#include "driver.h"
-#include "resultset_metadata.h"
-#include "statement.h"
+#include "mariadb/conncpp/Driver.hpp"
+#include "mariadb/conncpp/ResultSetMetaData.hpp"
+#include "mariadb/conncpp/Statement.hpp"
 #include <cstddef>
 
 namespace connection
 {
-
     MysqlConnection::MysqlConnection(const connection::ConnectionSettings& settings)
     {
-        sql::Driver *driver = get_driver_instance();
+        sql::Driver *driver = sql::mariadb::get_driver_instance();
         this->_connection = driver->connect(settings.create_by_template("${protocol}://${url}:${port}")
                               ,settings.user, settings.password);
         this->_statement = this->_connection->createStatement();

@@ -5,13 +5,13 @@ set(CMAKE_CXX_STANDARD 14)
 set(CMAKE_CXX_FLAGS "-Wall -g -fsanitize=address -fsanitize=undefined -fno-sanitize-recover=all -fsanitize=float-divide-by-zero -fsanitize=float-cast-overflow -fno-sanitize=null -fno-sanitize=alignment")
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON CACHE INTERNAL "")
-set(MYSQL_CONNECTOR_DIR ${CMAKE_SOURCE_DIR}/libs/mysql-connector)
+set(MYSQL_CONNECTOR_DIR ${CMAKE_SOURCE_DIR}/libs/mariadb-connector)
 
 file(GLOB SOURCE_FILES ${CMAKE_SOURCE_DIR}/src/*.cpp)
 
 include_directories(${MYSQL_CONNECTOR_DIR}/include)
-include_directories(${MYSQL_CONNECTOR_DIR}/include/jdbc/cppconn)
-link_directories(${MYSQL_CONNECTOR_DIR}/lib64)
+include_directories(${MYSQL_CONNECTOR_DIR}/include/mariadb/cppconn)
+link_directories(${MYSQL_CONNECTOR_DIR}/lib/mariadb)
 
 find_package(PkgConfig)
 
@@ -30,4 +30,4 @@ if (THREADS_FOUND)
     target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-target_link_libraries(${PROJECT_NAME} curl mysqlcppconn ${GTKMM_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} curl mariadbcpp ${GTKMM_LIBRARIES})

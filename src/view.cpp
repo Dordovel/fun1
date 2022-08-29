@@ -77,7 +77,6 @@ namespace view
             if(iterator)
             {
                 std::string value = iterator->get_value(column);
-                std::cout<<value<<std::endl;
                 columns.emplace(header->get_title(), value);
             }
         }

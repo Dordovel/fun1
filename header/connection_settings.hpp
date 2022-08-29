@@ -14,25 +14,31 @@ namespace connection
             std::string replace_protocol(std::string connectionTemplate) const
             {
                 auto pos = connectionTemplate.find("${protocol}");
+
+                if(pos == std::string::npos) return connectionTemplate;
                 return connectionTemplate.replace(pos, strlen("${protocol}") , this->protocol);
             }
 
             std::string replace_url(std::string connectionTemplate) const
             {
                 auto pos = connectionTemplate.find("${url}");
+
+                if(pos == std::string::npos) return connectionTemplate;
                 return connectionTemplate.replace(pos, strlen("${url}") , this->url);
             }
 
             std::string replace_port(std::string connectionTemplate) const
             {
                 auto pos = connectionTemplate.find("${port}");
+
+                if(pos == std::string::npos) return connectionTemplate;
                 return connectionTemplate.replace(pos, strlen("${port}") , this->port);
             }
 
         public:
-            std::string url = "localhost";
+            std::string url;
             std::string protocol = "tcp";
-            std::string port = "3306";
+            std::string port;
             std::string user;
             std::string password;
             std::string schema;

@@ -3,9 +3,9 @@
 #include "header/manager.hpp"
 #include "interface/itimer.hpp"
 #include "interface/itimer_subscriber.hpp"
-#include <mysql/jdbc.h>
 #include <iostream>
 #include <stdlib.h>
+#include <mariadb/conncpp/Exception.hpp>
 
 #include <gtkmm/application.h>
 #include <gtkmm/builder.h>
