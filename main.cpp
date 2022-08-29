@@ -1,6 +1,13 @@
 #include "header/connection.hpp"
+#include "header/controller.hpp"
 #include "header/delay_base.hpp"
+#include "header/login.hpp"
+#include "header/manager.hpp"
+#include "interface/ievent_subscriber.hpp"
+#include "interface/itimer.hpp"
+#include "interface/itimer_subscriber.hpp"
 #include "resultset_metadata.h"
+#include <functional>
 #include <mysql/jdbc.h>
 #include <iostream>
 #include <stdlib.h>
@@ -9,67 +16,42 @@
 
 #include <gtkmm/application.h>
 #include <gtkmm/builder.h>
-#include "header/window.hpp"
-
-#include "header/delay.hpp"
-#include "header/worker.hpp"
+#include "header/view.hpp"
 
 int main(void)
 {
-    connection::ConnectionSettings settings;
-
     try
     {
-        connection::MysqlConnection& connection = connection::MysqlConnection::instance(settings);
+        worker::Controller controller;
 
         Glib::RefPtr<Gtk::Application> app = Gtk::Application::create("View");
-        Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create();
-        builder->add_from_file("./Main.glade");
+        Glib::RefPtr<Gtk::Builder> builderView = Gtk::Builder::create();
+
         view::View* view = nullptr;
-
-        builder->get_widget_derived("MainWindow", view);
-
+        builderView->add_from_file("./Main.glade");
+        builderView->get_widget_derived("MainWindow", view);
         if(!view) return EXIT_FAILURE;
 
-        connection.process_list();
-        auto columns = connection.fetch_columns();
-        for(const std::string& column : columns)
-        {
-            view->add_columns(column);
-        }
+        Glib::RefPtr<Gtk::Builder> builderLogin = Gtk::Builder::create();
+        view::Login* login = nullptr;
+        builderLogin->add_from_file("./Login.glade");
+        builderLogin->get_widget_derived("LoginWindow", login);
 
-        while(connection.next())
-        {
-            view->add_row(connection.fetch_array());
-        }
+        view::Manager manager(static_cast<worker::IHandler*>(&controller));
 
-        auto functor = [&connection]()
-            {
-                std::vector<std::vector<std::string>> buffer;
-                connection.process_list();
-                buffer.reserve(connection.fetch_size());
-
-                while(connection.next())
-                {
-                    buffer.emplace_back(connection.fetch_array());
-                }
-                connection.clear_last_execute_decriptors();
-                return buffer;
-            };
-
-        auto callback = [&view](std::vector<std::vector<std::string>> rows)
-            {
-                view->add_rows(std::move(rows));
-            };
-
-        worker::Worker<decltype(callback) , decltype(functor)> worker(5, callback, functor);
         view->add_timer_value(5);
         view->add_timer_value(10);
         view->add_timer_value(20);
         view->add_timer_value(50);
-        view->change_timer_subscribe(&worker);
+        view->set_size_request(700, 300);
+        view->event_subscribe(static_cast<worker::IHandler*>(&manager));
+        view->timer_subscribe(static_cast<worker::ITimer*>(&controller));
 
-        app->run(*view);
+        login->event_subscribe(static_cast<worker::IHandler*>(&manager));
+
+        manager.add(view);
+        manager.add(login);
+        manager.run(app);
     }
     catch (sql::SQLException &e)
     {
@@ -79,8 +61,6 @@ int main(void)
         std::cout << " (MySQL error code: " << e.getErrorCode();
         std::cout << ", SQLState: " << e.getSQLState() << " )" << std::endl;
     }
-
-    std::cout << std::endl;
 
     return EXIT_SUCCESS;
 }

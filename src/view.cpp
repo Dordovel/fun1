@@ -1,8 +1,11 @@
-#include "../header/window.hpp"
+#include "../header/view.hpp"
 #include "../header/update_view_timer_model.hpp"
+#include "gtkmm/treeselection.h"
 #include "sigc++/functors/mem_fun.h"
+#include <glibmm-2.4/glibmm/refptr.h>
 #include <iostream>
 #include <string>
+#include <unordered_map>
 
 namespace view
 {
@@ -10,9 +13,16 @@ namespace view
     {
         m_RefGlade->get_widget("Table", this->_view);
         m_RefGlade->get_widget("Timer", this->_timerBox);
+        m_RefGlade->get_widget("KillButton", this->_killButton);
+
+        Gtk::Window::signal_show().connect(sigc::mem_fun(this, &View::signal_show));
+        Gtk::Window::signal_hide().connect(sigc::mem_fun(this, &View::signal_hide));
+
+        this->_killButton->signal_clicked().connect(sigc::mem_fun(this, &View::signal_button_kill));
+        this->_view->signal_row_activated().connect(sigc::mem_fun(this, &View::signal_change_item));
 
         this->_timerBox->signal_changed().connect(sigc::mem_fun(this, &View::signal_change_timer));
-        this->_dispatcher.connect(sigc::mem_fun(this, &View::update));
+        this->_dispatcher.connect(sigc::mem_fun(this, &View::refresh));
     }
 
     void View::init_timer()
@@ -48,7 +58,42 @@ namespace view
         }
     }
 
-    void View::update()
+    void View::signal_change_item(const Gtk::TreePath & tree, Gtk::TreeViewColumn * column)
+    {
+    }
+
+    void View::signal_button_kill()
+    {
+        Glib::RefPtr<Gtk::TreeSelection> selection = this->_view->get_selection();
+        Gtk::TreeModel::iterator iterator = selection->get_selected();
+        std::unordered_map<std::string, std::string> columns;
+        columns.reserve(this->_columns.size());
+        
+        for(decltype(this->_columns)::size_type i = 0; i < this->_columns.size(); ++i)
+        {   
+            auto& column = this->_columns[i];
+            auto* header = this->_view->get_column(i);
+
+            std::string value = iterator->get_value(column);
+            columns.emplace(header->get_title(), value);
+        }
+        
+        this->_subscriber->event(static_cast<IWindow*>(this), columns, worker::IHandler::handle::KILL);
+    
+    }
+
+    void View::signal_show()
+    {
+        this->_subscriber->event(static_cast<IWindow*>(this), worker::IHandler::handle::COLUMNS);
+        this->_timerSubscriber->subscribe(static_cast<worker::IUpdate*>(this));
+    }
+
+    void View::signal_hide()
+    {
+        this->_timerSubscriber->unsubscribe(static_cast<worker::IUpdate*>(this));
+    }
+
+    void View::refresh()
     {
         this->_treeModel->clear();
 
@@ -90,14 +135,24 @@ namespace view
         }
     }
 
-    void View::change_timer_subscribe(worker::IUpdateTimer* updater)
+    void View::timer_subscribe(worker::ITimer* updater)
     {
         this->_timerSubscriber = updater;
         this->init_timer();
     }
 
+    void View::event_subscribe(worker::IHandler* handler)
+    {
+        this->_subscriber = handler;
+    }
+
     void View::add_timer_value(long timer)
     {
         this->_timers.push_back(std::move(timer));
+    }
+
+    void View::update()
+    {
+        this->_subscriber->event(static_cast<IWindow*>(this), worker::IHandler::handle::ROWS);
     }
 };

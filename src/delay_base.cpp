@@ -2,9 +2,8 @@
 
 namespace worker
 {
-    ADelay::ADelay(long delay, bool stat): _isRun(stat), _isPause(stat), _delay(delay)
+    ADelay::ADelay(long delay):_isRun(true),_isPause(true), _delay(delay)
     {
-        this->_isRun = true;
         this->_thread = std::thread(&ADelay::worker, this, this);
     }
 
@@ -15,7 +14,7 @@ namespace worker
 
     void ADelay::run() noexcept
     {
-        this->_isPause = false;
+        this->_isPause.store(false);
         this->_cv.notify_one();
     }
 
@@ -40,7 +39,7 @@ namespace worker
 
     void ADelay::stop() noexcept
     {
-        this->_isPause = true;
+        this->_isPause.store(true);
     }
 
     void ADelay::change_time(long delay)
@@ -51,11 +50,11 @@ namespace worker
     ADelay::~ADelay()
     {
         if(this->_isRun)
-            this->_isRun = false;
+            this->_isRun.store(false);
 
         if(this->_isPause)
         {
-            this->_isPause = false;
+            this->_isPause.store(false);
             this->_cv.notify_one();
         }
 

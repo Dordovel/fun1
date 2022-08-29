@@ -1,13 +1,16 @@
 #ifndef TIMER_INTERFACE
 #define TIMER_INTERFACE
 
+#include "iupdate.hpp"
 namespace worker
 {
-    class IUpdateTimer
+    class ITimer
     {
         public:
             virtual void change_delay(long delay) = 0;
-            virtual ~IUpdateTimer() = default;
+            virtual void subscribe(IUpdate*) = 0;
+            virtual void unsubscribe(IUpdate*) = 0;
+            virtual ~ITimer() = default;
     };
 };
 

@@ -2,6 +2,7 @@
 #define CONNECTION
 
 #include "connection_settings.hpp"
+#include <string>
 #include <unordered_map>
 #include <vector>
 
@@ -21,10 +22,10 @@ namespace connection
             sql::Statement* _statement;
             sql::ResultSet* _resultSet;
 
-            MysqlConnection(connection::ConnectionSettings& settings);
+            MysqlConnection(const connection::ConnectionSettings& settings);
 
         public:
-            static MysqlConnection& instance(connection::ConnectionSettings& settings);
+            static MysqlConnection* instance(const connection::ConnectionSettings& settings);
             MysqlConnection(const MysqlConnection&) = delete;
             MysqlConnection& operator = (const MysqlConnection&) = delete;
 
@@ -40,6 +41,7 @@ namespace connection
             void clear_last_execute_decriptors();
 
             void process_list();
+            void kill_process(std::unordered_map<std::string, std::string>);
             
             ~MysqlConnection();
     };

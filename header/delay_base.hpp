@@ -18,16 +18,15 @@ namespace worker
 
         protected:
 
-            virtual void invoke() const noexcept = 0;
+            virtual void invoke() noexcept = 0;
 
-            ADelay(long delay, bool stat);
+            ADelay(long delay);
 
             virtual ~ADelay();
 
             void worker(ADelay* delay) const noexcept;
 
     public:
-
             bool is_run() const noexcept;
 
             void run() noexcept;

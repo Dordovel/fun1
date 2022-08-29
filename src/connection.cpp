@@ -8,7 +8,7 @@
 namespace connection
 {
 
-    MysqlConnection::MysqlConnection(connection::ConnectionSettings& settings)
+    MysqlConnection::MysqlConnection(const connection::ConnectionSettings& settings)
     {
         sql::Driver *driver = get_driver_instance();
         this->_connection = driver->connect(settings.create_by_template("${protocol}://${url}:${port}")
@@ -16,10 +16,10 @@ namespace connection
         this->_statement = this->_connection->createStatement();
     }
 
-    MysqlConnection& MysqlConnection::instance(connection::ConnectionSettings& settings)
+    MysqlConnection* MysqlConnection::instance(const connection::ConnectionSettings& settings)
     {
         static MysqlConnection connection(settings);
-        return connection;
+        return &connection;
     }
 
     MysqlConnection::MysqlConnection(MysqlConnection&& oldConnection)
@@ -125,6 +125,11 @@ namespace connection
     void MysqlConnection::process_list()
     {
         this->execute("SHOW PROCESSLIST");
+    }
+
+    void MysqlConnection::kill_process(std::unordered_map<std::string, std::string> data)
+    {
+        this->execute("KILL "+ data["Id"]);
     }
 
     MysqlConnection::~MysqlConnection()
