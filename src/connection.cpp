@@ -1,5 +1,4 @@
 #include "../header/connection.hpp"
-#include "connection.h"
 #include "driver.h"
 #include "resultset_metadata.h"
 #include "statement.h"

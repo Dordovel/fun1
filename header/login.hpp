@@ -18,7 +18,9 @@ namespace view
             
             Gtk::Entry* _loginEntry = nullptr;
             Gtk::Entry* _passwordEntry = nullptr;
-            Gtk::Button* _applyButton = nullptr;
+			Gtk::Entry* _hostEntry = nullptr;
+			Gtk::Entry* _portEntry = nullptr;
+			Gtk::Button* _applyButton = nullptr;
 
             void signal_login_button_event();
             

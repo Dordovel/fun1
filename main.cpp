@@ -1,18 +1,11 @@
-#include "header/connection.hpp"
 #include "header/controller.hpp"
-#include "header/delay_base.hpp"
 #include "header/login.hpp"
 #include "header/manager.hpp"
-#include "interface/ievent_subscriber.hpp"
 #include "interface/itimer.hpp"
 #include "interface/itimer_subscriber.hpp"
-#include "resultset_metadata.h"
-#include <functional>
 #include <mysql/jdbc.h>
 #include <iostream>
 #include <stdlib.h>
-#include "header/connection_settings.hpp"
-#include "header/connection.hpp"
 
 #include <gtkmm/application.h>
 #include <gtkmm/builder.h>

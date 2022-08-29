@@ -1,6 +1,8 @@
 #ifndef IWINDOW
 #define IWINDOW
 
+#include <string>
+#include <vector>
 namespace view
 {
     class IWindow

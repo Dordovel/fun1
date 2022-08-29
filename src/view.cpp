@@ -74,8 +74,12 @@ namespace view
             auto& column = this->_columns[i];
             auto* header = this->_view->get_column(i);
 
-            std::string value = iterator->get_value(column);
-            columns.emplace(header->get_title(), value);
+            if(iterator)
+            {
+                std::string value = iterator->get_value(column);
+                std::cout<<value<<std::endl;
+                columns.emplace(header->get_title(), value);
+            }
         }
         
         this->_subscriber->event(static_cast<IWindow*>(this), columns, worker::IHandler::handle::KILL);

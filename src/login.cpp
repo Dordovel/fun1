@@ -10,6 +10,8 @@ namespace view
         m_RefGlade->get_widget("LoginEntry", this->_loginEntry);
         m_RefGlade->get_widget("PasswordEntry", this->_passwordEntry);
         m_RefGlade->get_widget("ButtonLogin", this->_applyButton);
+        m_RefGlade->get_widget("Port", this->_portEntry);
+        m_RefGlade->get_widget("Host", this->_hostEntry);
 
         this->_applyButton->signal_clicked().connect(sigc::mem_fun(this, &Login::signal_login_button_event));
     }
@@ -18,9 +20,14 @@ namespace view
     {
         std::string password = this->_passwordEntry->get_text();
         std::string login = this->_loginEntry->get_text();
+        std::string host = this->_hostEntry->get_text();
+        std::string port = this->_portEntry->get_text();
+
         std::unordered_map<std::string, std::string>data;
         data.emplace("login", std::move(login));
         data.emplace("password", std::move(password));
+        data.emplace("host", std::move(host));
+        data.emplace("port", std::move(port));
         this->_subscriber->event(static_cast<IWindow*>(this), data, worker::IHandler::handle::AUTH);
         this->_subscriber->event(static_cast<IWindow*>(this), worker::IHandler::handle::HIDE);
     }

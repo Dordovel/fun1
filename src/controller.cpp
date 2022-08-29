@@ -36,6 +36,8 @@ namespace worker
                  connection::ConnectionSettings settings;
                     settings.user = data["login"];
                     settings.password = data["password"];
+                    settings.url = data["host"];
+                    settings.port = data["port"];
                     this->_connections = connection::MysqlConnection::instance(settings);
             break;
         }
