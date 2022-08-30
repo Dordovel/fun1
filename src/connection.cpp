@@ -70,6 +70,8 @@ namespace connection
             result.emplace(meta->getColumnLabel(field), this->_resultSet->getString(field));
         }
 
+        delete meta;
+
         return result;
     }
 
@@ -87,6 +89,8 @@ namespace connection
             result.emplace_back(this->_resultSet->getString(field));
         }
 
+        delete meta;
+
         return result;
     }
 
@@ -102,6 +106,8 @@ namespace connection
         {
             result.emplace_back(meta->getColumnLabel(field));
         }
+
+        delete meta;
 
         return result;
     }

@@ -1,9 +1,10 @@
 #include "../header/controller.hpp"
+#include <mariadb/conncpp/Exception.hpp>
 #include <iostream>
 
 namespace worker
 {
-    Controller::Controller() : ADelay(1) {}
+    Controller::Controller() : ADelay(5) {}
 
     std::vector<std::vector<std::string>> Controller::fetch_process_list_from_connection()
     {
@@ -26,44 +27,59 @@ namespace worker
 
     void Controller::event(view::IWindow* window, std::unordered_map<std::string, std::string> data, handle type)
     {
-        switch (type)
+        try
         {
-            case worker::IHandler::handle::KILL:
-                this->_connections->kill_process(std::move(data));
-            break;
+            switch (type)
+            {
+                case worker::IHandler::handle::KILL:
+                    this->_connections->kill_process(std::move(data));
+                break;
 
-            case worker::IHandler::handle::AUTH:
-                 connection::ConnectionSettings settings;
-                    settings.user = data["login"];
-                    settings.password = data["password"];
-                    settings.url = data["host"];
-                    settings.port = data["port"];
-                    this->_connections = connection::MysqlConnection::instance(settings);
-            break;
+                case worker::IHandler::handle::AUTH:
+                    connection::ConnectionSettings settings;
+                        settings.user = data["login"];
+                        settings.password = data["password"];
+                        settings.url = data["host"];
+                        settings.port = data["port"];
+                        this->_connections = connection::MysqlConnection::instance(settings);
+                break;
+            }
+        }
+        catch (sql::SQLException &e)
+        {
+            window->show_message(e.getMessage().c_str());
         }
     }
 
     void Controller::event(view::IWindow* window, handle type)
     {
-        switch (type)
+        try
         {
-            case worker::IHandler::handle::COLUMNS:
+            switch (type)
             {
-                this->_connections->process_list();
-                auto columns = this->_connections->fetch_columns();
-                for(auto&& column : columns)
+                case worker::IHandler::handle::COLUMNS:
                 {
-                    window->add_columns(std::move(column));
+                    this->_connections->process_list();
+                    auto columns = this->_connections->fetch_columns();
+                    for(auto&& column : columns)
+                    {
+                        window->add_columns(std::move(column));
+                    }
+                    this->_connections->clear_last_execute_decriptors();
                 }
-                this->_connections->clear_last_execute_decriptors();
+                break;
+                case worker::IHandler::handle::ROWS:
+                {
+                    window->add_rows(this->fetch_process_list_from_connection());
+                }
+                break;
             }
-            break;
-            case worker::IHandler::handle::ROWS:
-            {
-                window->add_rows(this->fetch_process_list_from_connection());
-            }
-            break;
         }
+        catch (sql::SQLException &e)
+        {
+            window->show_message(e.getMessage().c_str());
+        }
+
     }
 
     void Controller::change_delay(long delay)

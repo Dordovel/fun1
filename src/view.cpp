@@ -3,7 +3,6 @@
 #include "gtkmm/treeselection.h"
 #include "sigc++/functors/mem_fun.h"
 #include <glibmm-2.4/glibmm/refptr.h>
-#include <iostream>
 #include <string>
 #include <unordered_map>
 
@@ -41,6 +40,7 @@ namespace view
                 row[model.col_name] = "..." + std::to_string(timer) + " seconds";
             }
             this->_timerBox->pack_start(model.col_name);
+            this->_timerBox->set_active(0);
             this->_timerBox->show_all_children();
         }
     }
@@ -136,6 +136,11 @@ namespace view
             this->_workerBuffer = std::move(rows);
             this->_dispatcher.emit();
         }
+    }
+
+    void View::show_message(std::string message)
+    {
+        
     }
 
     void View::timer_subscribe(worker::ITimer* updater)

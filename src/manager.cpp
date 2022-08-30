@@ -20,7 +20,7 @@ namespace view
 
     void Manager::event(view::IWindow* window, std::unordered_map<std::string, std::string> data, handle type)
     {
-        this->_handler->event(window, std::move(data), type);
+        this->_handler->event(static_cast<IWindow*>(this), std::move(data), type);
     }
 
     void Manager::event(view::IWindow* window, handle type)
@@ -42,5 +42,29 @@ namespace view
                 this->_handler->event(window, type);
             break;
         }
+    }
+
+    void Manager::add_columns(std::string columns)
+    {
+        auto pointer = dynamic_cast<IWindow*>(this->_stack.top());
+        pointer->add_columns(std::move(columns));
+    }
+
+    void Manager::add_row(std::vector<std::string> row)
+    {
+        auto pointer = dynamic_cast<IWindow*>(this->_stack.top());
+        pointer->add_row(std::move(row));
+    }
+
+    void Manager::add_rows(std::vector<std::vector<std::string>> rows)
+    {
+        auto pointer = dynamic_cast<IWindow*>(this->_stack.top());
+        pointer->add_rows(std::move(rows));
+    }
+
+    void Manager::show_message(std::string message)
+    {
+        this->_info.show_message(std::move(message));
+        this->_info.show();
     }
 };
