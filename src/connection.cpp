@@ -3,6 +3,7 @@
 #include "mariadb/conncpp/ResultSetMetaData.hpp"
 #include "mariadb/conncpp/Statement.hpp"
 #include <cstddef>
+#include <iostream>
 
 namespace connection
 {
@@ -84,7 +85,7 @@ namespace connection
         const std::size_t fieldsCount = meta->getColumnCount();
         result.reserve(fieldsCount);
         
-        for(std::size_t field = 1; field < fieldsCount; ++field)
+        for(std::size_t field = 1; field <= fieldsCount; ++field)
         {
             result.emplace_back(this->_resultSet->getString(field));
         }
@@ -98,11 +99,10 @@ namespace connection
     {
         std::vector<std::string> result;
         sql::ResultSetMetaData* meta = this->_resultSet->getMetaData();
-
         const std::size_t fieldsCount = meta->getColumnCount();
         result.reserve(fieldsCount);
-        
-        for(std::size_t field = 1; field < fieldsCount; ++field)
+
+        for(std::size_t field = 1; field <= fieldsCount; ++field)
         {
             result.emplace_back(meta->getColumnLabel(field));
         }
@@ -128,7 +128,7 @@ namespace connection
 
     void MysqlConnection::process_list()
     {
-        this->execute("SHOW PROCESSLIST");
+        this->execute("SHOW FULL PROCESSLIST");
     }
 
     void MysqlConnection::kill_process(std::unordered_map<std::string, std::string> data)

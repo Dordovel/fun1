@@ -11,6 +11,9 @@
 #include <gtkmm/builder.h>
 #include "header/view.hpp"
 
+#include <libconfig.h++>
+#include <type_traits>
+
 int main(void)
 {
     worker::Controller controller;
@@ -30,11 +33,12 @@ int main(void)
 
     view::Manager manager(static_cast<worker::IHandler*>(&controller));
 
+    view->add_timer_value(1);
     view->add_timer_value(5);
     view->add_timer_value(10);
     view->add_timer_value(20);
     view->add_timer_value(50);
-    view->set_size_request(700, 300);
+    view->set_size_request(900, 500);
     view->event_subscribe(static_cast<worker::IHandler*>(&manager));
     view->timer_subscribe(static_cast<worker::ITimer*>(&controller));
 

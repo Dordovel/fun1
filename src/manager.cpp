@@ -44,13 +44,19 @@ namespace view
         }
     }
 
-    void Manager::add_columns(std::string columns)
+    void Manager::add_columns(std::vector<std::string> columns)
     {
         auto pointer = dynamic_cast<IWindow*>(this->_stack.top());
         pointer->add_columns(std::move(columns));
     }
 
     void Manager::add_row(std::vector<std::string> row)
+    {
+        auto pointer = dynamic_cast<IWindow*>(this->_stack.top());
+        pointer->add_row(std::move(row));
+    }
+
+    void Manager::add_row(std::unordered_map<std::string,std::string> row)
     {
         auto pointer = dynamic_cast<IWindow*>(this->_stack.top());
         pointer->add_row(std::move(row));

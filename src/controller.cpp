@@ -61,10 +61,7 @@ namespace worker
                 {
                     this->_connections->process_list();
                     auto columns = this->_connections->fetch_columns();
-                    for(auto&& column : columns)
-                    {
-                        window->add_columns(std::move(column));
-                    }
+                    window->add_columns(std::move(columns));
                     this->_connections->clear_last_execute_decriptors();
                 }
                 break;

@@ -37,8 +37,9 @@ namespace view
         this->_subscriber = handler;
     }
 
-    void Login::add_columns(std::string columns){}
+    void Login::add_columns(std::vector<std::string> columns){}
     void Login::add_row(std::vector<std::string> row){}
+    void Login::add_row(std::unordered_map<std::string,std::string> row){}
     void Login::add_rows(std::vector<std::vector<std::string>> rows){}
     void Login::show_message(std::string message){}
 };

@@ -5,6 +5,7 @@
 #include <glibmm-2.4/glibmm/refptr.h>
 #include <string>
 #include <unordered_map>
+#include <utility>
 
 namespace view
 {
@@ -49,7 +50,7 @@ namespace view
     {
         view::ModelColumns model;
         int activeId = this->_timerBox->get_active_row_number();
-        if(0 < activeId)
+        if(0 <= activeId)
         {
             if (this->_timerSubscriber) 
             {
@@ -71,7 +72,7 @@ namespace view
         
         for(decltype(this->_columns)::size_type i = 0; i < this->_columns.size(); ++i)
         {   
-            auto& column = this->_columns[i];
+            auto& column = this->_columns[i].second;
             auto* header = this->_view->get_column(i);
 
             if(iterator)
@@ -108,15 +109,22 @@ namespace view
         this->_workerBuffer.clear();
     }
 
-    void View::add_columns(std::string columns)
+    void View::add_columns(std::vector<std::string> columns)
     {
-        this->_columns.emplace_back();
-        this->_record.add(this->_columns.back());
-        this->_treeModel = Gtk::ListStore::create(this->_record);
-        this->_view->set_model(this->_treeModel);
+        this->_columns.clear();
+        this->_columns.reserve(columns.size());
 
-		this->_view->append_column(columns, this->_columns.back());
-        this->_view->show_all_children();
+        for(auto begin = columns.begin(); begin < columns.end(); ++begin)
+        {
+            Gtk::TreeModelColumn<std::string> column;
+            this->_record.add(column);
+            this->_treeModel = Gtk::ListStore::create(this->_record);
+            this->_view->set_model(this->_treeModel);
+
+            this->_view->append_column(*begin, column);
+            this->_columns.push_back(std::make_pair(std::move(*begin), std::move(column)));
+            this->_view->show_all_children();
+        }
     }
 
     void View::add_row(std::vector<std::string> row)
@@ -125,7 +133,17 @@ namespace view
 
         for(decltype(this->_columns)::size_type i = 0; i < this->_columns.size(); ++i)
         {
-            refRecord[this->_columns[i]] = row[i];
+            refRecord[this->_columns[i].second] = row[i];
+        }
+    }
+
+    void View::add_row(std::unordered_map<std::string,std::string> row)
+    {
+        auto refRecord = *(this->_treeModel->append());
+
+        for (const auto& column : this->_columns) 
+        {
+            refRecord[column.second] = row[column.first];
         }
     }
 

@@ -30,4 +30,4 @@ if (THREADS_FOUND)
     target_link_libraries(${PROJECT_NAME} ${CMAKE_THREAD_LIBS_INIT})
 endif()
 
-target_link_libraries(${PROJECT_NAME} curl mariadbcpp ${GTKMM_LIBRARIES})
+target_link_libraries(${PROJECT_NAME} curl mariadbcpp ${GTKMM_LIBRARIES} config++)
