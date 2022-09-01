@@ -25,7 +25,7 @@ namespace view
             Gtk::TreeView* _view = nullptr;
             Glib::RefPtr<Gtk::ListStore> _treeModel;
             Gtk::TreeModel::ColumnRecord _record;
-            std::vector<std::pair<std::string, Gtk::TreeModelColumn<std::string>>> _columns;
+            std::vector<Gtk::TreeModelColumn<std::string>> _columns;
 
             Gtk::Button* _killButton = nullptr;
 
@@ -49,7 +49,6 @@ namespace view
             View(Gtk::Window::BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& m_RefGlade);
             void add_columns(std::vector<std::string> columns) override;
             void add_row(std::vector<std::string> row) override;
-            void add_row(std::unordered_map<std::string,std::string> row) override;
             void add_rows(std::vector<std::vector<std::string>> rows) override;
             void show_message(std::string message) override;
             void timer_subscribe(worker::ITimer* updater) override;

@@ -8,6 +8,8 @@
 #include "gtkmm/builder.h"
 #include "gtkmm/button.h"
 #include "gtkmm/entry.h"
+#include "gtkmm/liststore.h"
+#include "gtkmm/treeview.h"
 
 namespace view
 {
@@ -22,14 +24,20 @@ namespace view
 			Gtk::Entry* _portEntry = nullptr;
 			Gtk::Button* _applyButton = nullptr;
 
+            Gtk::TreeView* _historyBox = nullptr;
+            Glib::RefPtr<Gtk::ListStore> _treeModel;
+            Gtk::TreeModel::ColumnRecord _record;
+            std::vector<Gtk::TreeModelColumn<std::string>> _columns;
+
             void signal_login_button_event();
+
+            void add_column(std::string columns);
             
         public:
             Login(Gtk::Window::BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& m_RefGlade);
             void event_subscribe(worker::IHandler* handler) override;
             void add_columns(std::vector<std::string> columns) override;
             void add_row(std::vector<std::string> row) override;
-            void add_row(std::unordered_map<std::string,std::string> row) override;
             void add_rows(std::vector<std::vector<std::string>> rows) override;
             void show_message(std::string message) override;
     };

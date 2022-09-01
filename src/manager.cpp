@@ -56,12 +56,6 @@ namespace view
         pointer->add_row(std::move(row));
     }
 
-    void Manager::add_row(std::unordered_map<std::string,std::string> row)
-    {
-        auto pointer = dynamic_cast<IWindow*>(this->_stack.top());
-        pointer->add_row(std::move(row));
-    }
-
     void Manager::add_rows(std::vector<std::vector<std::string>> rows)
     {
         auto pointer = dynamic_cast<IWindow*>(this->_stack.top());

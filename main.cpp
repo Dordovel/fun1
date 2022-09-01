@@ -5,6 +5,7 @@
 #include "interface/itimer.hpp"
 #include "interface/itimer_subscriber.hpp"
 #include <iostream>
+#include <iterator>
 #include <stdlib.h>
 
 #include <gtkmm/application.h>
@@ -26,11 +27,31 @@ int main(void)
     builderView->get_widget_derived("MainWindow", view);
     if(!view) return EXIT_FAILURE;
 
+    std::vector<std::string> settingLabel = {"host", "port", "user", "password"};
     Glib::RefPtr<Gtk::Builder> builderLogin = Gtk::Builder::create();
     view::Login* login = nullptr;
     builderLogin->add_from_file("./Login.glade");
     builderLogin->get_widget_derived("LoginWindow", login);
+    login->add_columns(settingLabel);
 
+    libconfig::Config config;
+    config.readFile("../config.ini");
+    const libconfig::Setting& root = config.getRoot();
+    const libconfig::Setting& settings = root["application"]["login"];
+    const auto settingsCount = settings.getLength();
+    for(std::decay_t<decltype(settingsCount)> i = 0; i < settingsCount; ++i)
+    {
+        std::vector<std::string> settingValue;
+        settingValue.resize(settingLabel.size());
+
+        const libconfig::Setting& setting = settings[i];
+        for(decltype(settingLabel)::size_type g = 0; g < settingLabel.size(); ++g)
+        {
+            setting.lookupValue(settingLabel[g], settingValue[g]);
+        }
+        login->add_row(std::move(settingValue));
+    }
+    
     view::Manager manager(static_cast<worker::IHandler*>(&controller));
 
     view->add_timer_value(1);

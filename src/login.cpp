@@ -1,4 +1,9 @@
 #include "../header/login.hpp"
+#include "gtkmm/box.h"
+#include "gtkmm/enums.h"
+#include "gtkmm/label.h"
+#include "gtkmm/object.h"
+#include "gtkmm/liststore.h"
 #include "sigc++/functors/mem_fun.h"
 #include <string>
 #include <unordered_map>
@@ -12,6 +17,7 @@ namespace view
         m_RefGlade->get_widget("ButtonLogin", this->_applyButton);
         m_RefGlade->get_widget("Port", this->_portEntry);
         m_RefGlade->get_widget("Host", this->_hostEntry);
+        m_RefGlade->get_widget("History", this->_historyBox);
 
         this->_applyButton->signal_clicked().connect(sigc::mem_fun(this, &Login::signal_login_button_event));
     }
@@ -37,9 +43,39 @@ namespace view
         this->_subscriber = handler;
     }
 
-    void Login::add_columns(std::vector<std::string> columns){}
-    void Login::add_row(std::vector<std::string> row){}
-    void Login::add_row(std::unordered_map<std::string,std::string> row){}
+    void Login::add_column(std::string column)
+    {
+        Gtk::TreeModelColumn<std::string> columnModel;
+        this->_record.add(columnModel);
+        this->_treeModel = Gtk::ListStore::create(this->_record);
+        this->_historyBox->set_model(this->_treeModel);
+
+        this->_historyBox->append_column(column, columnModel);
+        this->_columns.push_back(std::move(columnModel));
+        this->_historyBox->show_all_children();
+    }
+
+    void Login::add_columns(std::vector<std::string> columns)
+    {
+        this->_columns.clear();
+        this->_columns.reserve(columns.size());
+
+        for(auto begin = columns.begin(); begin < columns.end(); ++begin)
+        {
+            this->add_column(std::move(*begin));
+        }
+    }
+
+    void Login::add_row(std::vector<std::string> row)
+    {
+        auto refRecord = *(this->_treeModel->append());
+
+        for(decltype(this->_columns)::size_type i = 0; i < this->_columns.size(); ++i)
+        {
+            refRecord[this->_columns[i]] = row[i];
+        }
+    }
+
     void Login::add_rows(std::vector<std::vector<std::string>> rows){}
     void Login::show_message(std::string message){}
 };

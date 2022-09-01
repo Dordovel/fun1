@@ -24,7 +24,6 @@ namespace view
 
             void add_columns(std::vector<std::string> columns) override;
             void add_row(std::vector<std::string> row) override;
-            void add_row(std::unordered_map<std::string,std::string> row) override;
             void add_rows(std::vector<std::vector<std::string>> rows) override;
             void show_message(std::string message) override;
     };

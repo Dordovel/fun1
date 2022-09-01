@@ -72,7 +72,7 @@ namespace view
         
         for(decltype(this->_columns)::size_type i = 0; i < this->_columns.size(); ++i)
         {   
-            auto& column = this->_columns[i].second;
+            auto& column = this->_columns[i];
             auto* header = this->_view->get_column(i);
 
             if(iterator)
@@ -122,7 +122,7 @@ namespace view
             this->_view->set_model(this->_treeModel);
 
             this->_view->append_column(*begin, column);
-            this->_columns.push_back(std::make_pair(std::move(*begin), std::move(column)));
+            this->_columns.push_back(std::move(column));
             this->_view->show_all_children();
         }
     }
@@ -133,17 +133,7 @@ namespace view
 
         for(decltype(this->_columns)::size_type i = 0; i < this->_columns.size(); ++i)
         {
-            refRecord[this->_columns[i].second] = row[i];
-        }
-    }
-
-    void View::add_row(std::unordered_map<std::string,std::string> row)
-    {
-        auto refRecord = *(this->_treeModel->append());
-
-        for (const auto& column : this->_columns) 
-        {
-            refRecord[column.second] = row[column.first];
+            refRecord[this->_columns[i]] = row[i];
         }
     }
 
