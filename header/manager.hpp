@@ -26,6 +26,7 @@ namespace view
             void add_row(std::vector<std::string> row) override;
             void add_rows(std::vector<std::vector<std::string>> rows) override;
             void show_message(std::string message) override;
+			void hide() override;
     };
 };
 

@@ -51,6 +51,7 @@ namespace view
             void add_row(std::vector<std::string> row) override;
             void add_rows(std::vector<std::vector<std::string>> rows) override;
             void show_message(std::string message) override;
+			void hide() override;
             void timer_subscribe(worker::ITimer* updater) override;
             void event_subscribe(worker::IHandler* handler) override;
             void add_timer_value(long timer);

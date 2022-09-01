@@ -151,6 +151,11 @@ namespace view
         
     }
 
+	void View::hide()
+	{
+		Gtk::Window::hide();
+	}
+
     void View::timer_subscribe(worker::ITimer* updater)
     {
         this->_timerSubscriber = updater;

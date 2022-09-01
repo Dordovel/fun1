@@ -21,7 +21,7 @@ namespace connection
         return &connection;
     }
 
-    MysqlConnection::MysqlConnection(MysqlConnection&& oldConnection)
+    MysqlConnection::MysqlConnection(MysqlConnection&& oldConnection) noexcept
     {
         this->_connection = oldConnection._connection;
         this->_statement = oldConnection._statement;
@@ -30,7 +30,7 @@ namespace connection
         oldConnection._connection = nullptr;
     }
 
-    MysqlConnection& MysqlConnection::operator = (MysqlConnection&& oldConnection)
+    MysqlConnection& MysqlConnection::operator = (MysqlConnection&& oldConnection) noexcept
     {
         this->_connection = oldConnection._connection;
         this->_statement = oldConnection._statement;
@@ -142,11 +142,13 @@ namespace connection
         {
             this->_connection->close();
             delete this->_connection;
+			this->_connection = nullptr;
         }
         if(this->_statement)
         {
             this->_statement->close();
             delete this->_statement;
+			this->_statement = nullptr;
         }
     }
 };

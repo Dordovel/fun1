@@ -139,4 +139,9 @@ namespace view
 
         this->add_row(row);
     }
+
+	void Login::hide()
+	{
+		Gtk::Window::hide();
+	}
 };

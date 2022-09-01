@@ -5,6 +5,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <mariadb/conncpp/Driver.hpp>
 
 namespace sql
 {
@@ -18,9 +19,9 @@ namespace connection
     class MysqlConnection
     {
         private:
-            sql::Connection* _connection;
-            sql::Statement* _statement;
-            sql::ResultSet* _resultSet;
+            sql::Connection* _connection = nullptr;
+            sql::Statement* _statement = nullptr;
+            sql::ResultSet* _resultSet = nullptr;
 
             MysqlConnection(const connection::ConnectionSettings& settings);
 
@@ -29,8 +30,8 @@ namespace connection
             MysqlConnection(const MysqlConnection&) = delete;
             MysqlConnection& operator = (const MysqlConnection&) = delete;
 
-            MysqlConnection(MysqlConnection&&);
-            MysqlConnection& operator = (MysqlConnection&&);
+            MysqlConnection(MysqlConnection&&) noexcept ;
+            MysqlConnection& operator = (MysqlConnection&&) noexcept;
 
             std::size_t fetch_size() const;
             bool next();

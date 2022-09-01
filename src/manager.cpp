@@ -25,23 +25,7 @@ namespace view
 
     void Manager::event(view::IWindow* window, handle type)
     {
-        switch (type)
-        {
-            case worker::IHandler::handle::HIDE:
-            {
-                Gtk::Window* wnd = this->_stack.top();
-                this->_handler->event(window, type);
-                wnd->hide();
-                this->_app->remove_window(*wnd);
-                this->_stack.pop();
-                this->_app->add_window(*(this->_stack.top()));
-                this->_stack.top()->show();
-            }
-            break;
-            default:
-                this->_handler->event(window, type);
-            break;
-        }
+		this->_handler->event(window, type);
     }
 
     void Manager::add_columns(std::vector<std::string> columns)
@@ -67,4 +51,14 @@ namespace view
         this->_info.show_message(std::move(message));
         this->_info.show();
     }
+
+	void Manager::hide()
+	{
+		Gtk::Window* wnd = this->_stack.top();
+		wnd->hide();
+		this->_app->remove_window(*wnd);
+		this->_stack.pop();
+		this->_app->add_window(*(this->_stack.top()));
+		this->_stack.top()->show();
+	}
 };

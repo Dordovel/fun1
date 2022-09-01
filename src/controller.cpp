@@ -42,6 +42,7 @@ namespace worker
                         settings.url = data["host"];
                         settings.port = data["port"];
                         this->_connections = connection::MysqlConnection::instance(settings);
+						if(this->_connections) window->hide();
                 break;
             }
         }
@@ -76,7 +77,6 @@ namespace worker
         {
             window->show_message(e.getMessage().c_str());
         }
-
     }
 
     void Controller::change_delay(long delay)
