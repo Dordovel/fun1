@@ -19,6 +19,8 @@ namespace view
         m_RefGlade->get_widget("Host", this->_hostEntry);
         m_RefGlade->get_widget("History", this->_historyBox);
 
+        this->_historyBox->signal_row_activated().connect(sigc::mem_fun(this, &Login::signal_row_activate));
+
         this->_applyButton->signal_clicked().connect(sigc::mem_fun(this, &Login::signal_login_button_event));
     }
 
@@ -36,6 +38,40 @@ namespace view
         data.emplace("port", std::move(port));
         this->_subscriber->event(static_cast<IWindow*>(this), data, worker::IHandler::handle::AUTH);
         this->_subscriber->event(static_cast<IWindow*>(this), worker::IHandler::handle::HIDE);
+    }
+
+    void Login::signal_row_activate(const Gtk::TreePath &, Gtk::TreeViewColumn *)
+    {
+        Glib::RefPtr<Gtk::TreeSelection> selection = this->_historyBox->get_selection();
+        Gtk::TreeModel::iterator iterator = selection->get_selected();
+        
+        for(decltype(this->_columns)::size_type i = 0; i < this->_columns.size(); ++i)
+        {   
+            auto& column = this->_columns[i];
+            auto* header = this->_historyBox->get_column(i);
+
+            if(iterator)
+            {
+                std::string value = iterator->get_value(column);
+                std::string title = header->get_title();
+                if(title == "host")
+                {
+                    this->_hostEntry->set_text(value);
+                }
+                else if(title == "port")
+                {
+                    this->_portEntry->set_text(value);
+                }
+                else if(title == "user")
+                {
+                    this->_loginEntry->set_text(value);
+                }
+                else if(title == "password")
+                {
+                    this->_passwordEntry->set_text(value);
+                }
+            }
+        }
     }
 
     void Login::event_subscribe(worker::IHandler* handler)
@@ -78,4 +114,29 @@ namespace view
 
     void Login::add_rows(std::vector<std::vector<std::string>> rows){}
     void Login::show_message(std::string message){}
+
+    std::vector<std::string> Login::get_setting_key()
+    {
+        return std::vector<std::string> {"host", "port", "user", "password"};
+    }
+
+    void Login::load_settings(std::unordered_map<std::string, std::string> settings)
+    {
+        if(this->_columns.empty())
+        {
+            this->add_columns(this->get_setting_key());
+        }
+
+        std::vector<std::string> row;
+        row.reserve(this->_columns.size());
+        
+        std::vector<std::string>keys = this->get_setting_key();
+
+        for(const std::string& key : keys)
+        {
+            row.emplace_back(std::move(settings[key]));
+        }
+
+        this->add_row(row);
+    }
 };

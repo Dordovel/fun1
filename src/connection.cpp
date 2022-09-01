@@ -128,7 +128,7 @@ namespace connection
 
     void MysqlConnection::process_list()
     {
-        this->execute("SHOW FULL PROCESSLIST");
+        this->execute("SELECT * FROM information_schema.PROCESSLIST");
     }
 
     void MysqlConnection::kill_process(std::unordered_map<std::string, std::string> data)

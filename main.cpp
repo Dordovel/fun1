@@ -14,6 +14,7 @@
 
 #include <libconfig.h++>
 #include <type_traits>
+#include <unordered_map>
 
 int main(void)
 {
@@ -27,29 +28,29 @@ int main(void)
     builderView->get_widget_derived("MainWindow", view);
     if(!view) return EXIT_FAILURE;
 
-    std::vector<std::string> settingLabel = {"host", "port", "user", "password"};
     Glib::RefPtr<Gtk::Builder> builderLogin = Gtk::Builder::create();
     view::Login* login = nullptr;
     builderLogin->add_from_file("./Login.glade");
     builderLogin->get_widget_derived("LoginWindow", login);
-    login->add_columns(settingLabel);
 
     libconfig::Config config;
     config.readFile("../config.ini");
     const libconfig::Setting& root = config.getRoot();
     const libconfig::Setting& settings = root["application"]["login"];
     const auto settingsCount = settings.getLength();
+
+    std::vector<std::string> settingLabel = login->get_setting_key();
     for(std::decay_t<decltype(settingsCount)> i = 0; i < settingsCount; ++i)
     {
-        std::vector<std::string> settingValue;
-        settingValue.resize(settingLabel.size());
+        std::unordered_map<std::string, std::string> settingValue;
+        settingValue.reserve(settingLabel.size());
 
         const libconfig::Setting& setting = settings[i];
-        for(decltype(settingLabel)::size_type g = 0; g < settingLabel.size(); ++g)
+        for(const std::string& label : settingLabel)
         {
-            setting.lookupValue(settingLabel[g], settingValue[g]);
+            setting.lookupValue(label, settingValue[label]);
         }
-        login->add_row(std::move(settingValue));
+        login->load_settings(std::move(settingValue));
     }
     
     view::Manager manager(static_cast<worker::IHandler*>(&controller));
