@@ -32,26 +32,6 @@ int main(void)
     view::Login* login = nullptr;
     builderLogin->add_from_file("./Login.glade");
     builderLogin->get_widget_derived("LoginWindow", login);
-
-    libconfig::Config config;
-    config.readFile("../config.ini");
-    const libconfig::Setting& root = config.getRoot();
-    const libconfig::Setting& settings = root["application"]["login"];
-    const auto settingsCount = settings.getLength();
-
-    std::vector<std::string> settingLabel = login->get_setting_key();
-    for(std::decay_t<decltype(settingsCount)> i = 0; i < settingsCount; ++i)
-    {
-        std::unordered_map<std::string, std::string> settingValue;
-        settingValue.reserve(settingLabel.size());
-
-        const libconfig::Setting& setting = settings[i];
-        for(const std::string& label : settingLabel)
-        {
-            setting.lookupValue(label, settingValue[label]);
-        }
-        login->load_settings(std::move(settingValue));
-    }
     
     view::Manager manager(static_cast<worker::IHandler*>(&controller));
 
