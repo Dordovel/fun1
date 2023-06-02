@@ -32,10 +32,10 @@ namespace view
             Gtk::TreeModel::ColumnRecord _record;
             std::vector<Gtk::TreeModelColumn<std::string>> _columns;
 
-            libconfig::Config _config;
-            static inline std::string _configPath = "./history";
+            libconfig::Setting& _config;
             std::vector<std::unordered_map<std::string, std::string>> _rows;
 
+            bool signal_enter_key(GdkEventKey* key);
             void signal_login_button_event();
             void signal_row_activate(const Gtk::TreePath &, Gtk::TreeViewColumn *);
             void add_column(std::string column);
@@ -44,14 +44,11 @@ namespace view
 
             void load_config();
             void load_from_node(const libconfig::Setting&);
-            bool read_config(const std::string& path);
-            bool write_config(const std::string& path);
-            libconfig::Setting& get_history_node();
 
             void clear_history();
 
         public:
-            Login(Gtk::Window::BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& m_RefGlade);
+            Login(Gtk::Window::BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& m_RefGlade, libconfig::Setting& config);
             void event_subscribe(worker::IHandler* handler) override;
             void add_columns(std::vector<std::string> columns) override;
             void add_row(std::vector<std::string> row) override;

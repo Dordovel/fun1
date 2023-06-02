@@ -15,7 +15,7 @@
 
 namespace view
 {
-    Login::Login(Gtk::Window::BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& m_RefGlade):Gtk::Window(cobject)
+    Login::Login(Gtk::Window::BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& m_RefGlade, libconfig::Setting& config):Gtk::Window(cobject), _config(config)
     {
         m_RefGlade->get_widget("LoginEntry", this->_loginEntry);
         m_RefGlade->get_widget("PasswordEntry", this->_passwordEntry);
@@ -28,8 +28,15 @@ namespace view
 
         this->_applyButton->signal_clicked().connect(sigc::mem_fun(this, &Login::signal_login_button_event));
 
-        if(this->read_config(this->_configPath))
-            this->load_config();
+        this->load_config();
+
+        Gtk::Window::signal_key_press_event().connect(sigc::mem_fun(this, &Login::signal_enter_key), false);
+    }
+
+    bool Login::signal_enter_key(GdkEventKey* key)
+    {
+        this->signal_login_button_event();
+        return false;
     }
 
     void Login::signal_login_button_event()
@@ -39,8 +46,7 @@ namespace view
         std::string host = this->_hostEntry->get_text();
         std::string port = this->_portEntry->get_text();
 
-        libconfig::Setting& settings = this->get_history_node();
-        libconfig::Setting& newNode = settings.add(libconfig::Setting::TypeGroup);
+        libconfig::Setting& newNode = this->_config.add(libconfig::Setting::TypeGroup);
         newNode.add("user", libconfig::Setting::TypeString);
         newNode.add("password", libconfig::Setting::TypeString);
         newNode.add("host", libconfig::Setting::TypeString);
@@ -51,8 +57,7 @@ namespace view
         newNode["host"] = host;
         newNode["port"] = port;
 
-        this->write_config(this->_configPath);
-        this->load_from_node(settings);
+        this->load_from_node(this->_config);
 
         std::unordered_map<std::string, std::string>data;
         data.emplace("login", std::move(login));
@@ -155,86 +160,11 @@ namespace view
         };
     }
 
-    bool Login::read_config(const std::string& path)
-    {
-        class rai
-        {
-            private:
-                FILE* file;
-            public:
-                rai(const std::string& path)
-                {
-                    file = fopen(path.c_str(), "r");
-                }
-
-                bool read(libconfig::Config& config)
-                {
-                    if(NULL == file) return false;
-                    config.read(file);
-                    return true;
-                }
-                
-                ~rai() noexcept
-                {
-                    if(file != NULL)
-                        fclose(file);
-                }
-        };
-
-        rai config(path);
-        return config.read(this->_config);
-    }
-
-    bool Login::write_config(const std::string& path)
-    {
-        class rai
-        {
-            private:
-                FILE* file;
-            public:
-                rai(const std::string& path)
-                {
-                    file = fopen(path.c_str(), "w");
-                }
-
-                bool read(libconfig::Config& config)
-                {
-                    if(NULL == file) return false;
-                    config.write(file);
-                    return true;
-                }
-                
-                ~rai() noexcept
-                {
-                    if(file != NULL)
-                        fclose(file);
-                }
-        };
-
-        rai config(path);
-        return config.read(this->_config);
-    }
-
     void Login::clear_history()
     {
         this->_rows.clear();
         this->_columns.clear();
         this->_historyBox->remove_all_columns();
-    }
-
-    libconfig::Setting& Login::get_history_node()
-    {
-        libconfig::Setting& root = this->_config.getRoot();
-        if(!root.exists("application"))
-        {
-            libconfig::Setting& appNode = root.add("application", libconfig::Setting::TypeGroup);
-            libconfig::Setting& historyNode = appNode.add("history", libconfig::Setting::TypeList);
-
-            return historyNode;
-        }
-
-        libconfig::Setting& settings = root["application"]["history"];
-        return settings;
     }
 
     void Login::load_from_node(const libconfig::Setting& settings)
@@ -278,7 +208,6 @@ namespace view
 
     void Login::load_config()
     {
-        const libconfig::Setting& settings = this->get_history_node();
-        this->load_from_node(settings);
+        this->load_from_node(this->_config);
     }
 };

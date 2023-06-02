@@ -16,6 +16,83 @@
 #include <type_traits>
 #include <unordered_map>
 
+const inline std::string configPath = "./history";
+
+bool read_config_from_file(libconfig::Config& config, const std::string& path)
+{
+    class rai
+    {
+        private:
+            FILE* file;
+        public:
+            rai(const std::string& path)
+            {
+                file = fopen(path.c_str(), "r");
+            }
+
+            bool read_in_config(libconfig::Config& config)
+            {
+                if(NULL == file) return false;
+                config.read(file);
+                return true;
+            }
+            
+            ~rai() noexcept
+            {
+                if(file != NULL)
+                    fclose(file);
+            }
+    };
+
+    rai configReader(path);
+    return configReader.read_in_config(config);
+}
+
+bool flush_config_to_file(libconfig::Config& config, const std::string& path)
+{
+    class rai
+    {
+        private:
+            FILE* file;
+        public:
+            rai(const std::string& path)
+            {
+                file = fopen(path.c_str(), "w");
+            }
+
+            bool write_config(libconfig::Config& config)
+            {
+                if(NULL == file) return false;
+                config.write(file);
+                return true;
+            }
+            
+            ~rai() noexcept
+            {
+                if(file != NULL)
+                    fclose(file);
+            }
+    };
+
+    rai configWriter(path);
+    return configWriter.write_config(config);
+}
+
+libconfig::Setting& get_history_node_from_config(libconfig::Config& config)
+{
+    libconfig::Setting& root = config.getRoot();
+    if(!root.exists("application"))
+    {
+        libconfig::Setting& appNode = root.add("application", libconfig::Setting::TypeGroup);
+        libconfig::Setting& historyNode = appNode.add("history", libconfig::Setting::TypeList);
+
+        return historyNode;
+    }
+
+    libconfig::Setting& settings = root["application"]["history"];
+    return settings;
+}
+
 int main(void)
 {
     worker::Controller controller;
@@ -28,10 +105,14 @@ int main(void)
     builderView->get_widget_derived("MainWindow", view);
     if(!view) return EXIT_FAILURE;
 
+    libconfig::Config config;
+    read_config_from_file(config, configPath);
+
     Glib::RefPtr<Gtk::Builder> builderLogin = Gtk::Builder::create();
+    libconfig::Setting& loginConfig = get_history_node_from_config(config);
     view::Login* login = nullptr;
     builderLogin->add_from_file("./Login.glade");
-    builderLogin->get_widget_derived("LoginWindow", login);
+    builderLogin->get_widget_derived("LoginWindow", login, loginConfig);
     
     view::Manager manager(static_cast<worker::IHandler*>(&controller));
 
@@ -49,5 +130,8 @@ int main(void)
     manager.add(view);
     manager.add(login);
     manager.run(app);
+
+    flush_config_to_file(config, configPath);
+
     return EXIT_SUCCESS;
 }
